@@ -156,7 +156,7 @@ class ProjectCard {
 
                     this.setImage(data.image)
                     this.setSubtitle(data.subtitle)
-                    this.setLink("Afficher", `/${this.repo.name}`)
+                    this.addLink("Afficher", `/${this.repo.name}`)
 
                     return
                 }
