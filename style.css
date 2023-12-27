@@ -45,6 +45,7 @@ a:hover::before {
   display: flex;
   justify-content: center;
   user-select: none;
+  -webkit-user-select: none;
   flex-wrap: wrap;
   gap: 20px;
 }
