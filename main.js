@@ -229,13 +229,13 @@ class ProjectCard {
                             let minDiff = Infinity
 
                             for (let link of doc.querySelectorAll("link")) {
+                                let originalHref = link.getAttribute("href")
+
                                 if (link.rel.endsWith("icon")) {
                                     const sizes = link.sizes
 
-                                    console.log(sizes)
-
                                     if (sizes.contains("any")) {
-                                        faviconHref = link.href
+                                        faviconHref = originalHref
                                         break
                                     }
                                     else if (sizes.length > 0) {
@@ -245,22 +245,21 @@ class ProjectCard {
                                             const diff = Math.abs(100 - Number(x)) + Math.abs(100 - Number(y))
                                             if (diff < minDiff) {
                                                 minDiff = diff
-                                                faviconHref = link.href
+                                                faviconHref = originalHref
                                             }
                                             if (diff == 0) break
                                         }
                                     }
-                                    else {
-                                        faviconHref = link.href
+                                    else if (minDiff == Infinity) {
+                                        faviconHref = originalHref
                                     }
                                 }
                             }
-
                             if (faviconHref && !faviconHref.includes("://")) {
                                 faviconHref = `/${this.repo.name}/${faviconHref}`
                             }
 
-                            data.image = new URL(faviconHref, this.repo.homepage ?? location.href).href
+                            data.image = faviconHref
                             data.subtitle = title ? title.textContent : null
                         } catch (error) {
                             console.info(`Failled to fetch index page of ${this.repo.name} at ${indexUrl} because ${error}. Using default image and subtitle`)
