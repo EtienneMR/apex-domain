@@ -58,6 +58,7 @@ a:hover::before {
 .bottom {
   align-content: start;
   min-height: calc(50svh + 0.75em + 152px);
+  padding-bottom: 20px;
 }
 
 .main-card {
