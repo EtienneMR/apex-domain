@@ -45,6 +45,15 @@ class ProjectCard {
         langsElement.className = "card__langs"
         card.appendChild(langsElement)
 
+        if (this.repo.archived || this.repo.fork) {
+            const icon = document.createElement("img")
+            icon.className = "card__status"
+            icon.width = icon.height = "24"
+            icon.alt = icon.title = this.repo.archived ? "Projet archivé" : "Porjet issu d'une fork"
+            icon.src = this.repo.archived ? ARCHIVE_IMAGE : FORK_IMAGE
+            card.appendChild(icon)
+        }
+
         const cardContent = this.content = document.createElement("div")
         cardContent.className = "card__content"
         card.appendChild(cardContent)
@@ -143,28 +152,13 @@ class ProjectCard {
         for (let lang in languages) {
             let value = languages[lang]
 
-            if (value < last * 0.5) break
+            if (value < last * 0.25) break
             if (value > last) last = value
 
             const icon = document.createElement("img")
             icon.width = icon.height = "24"
             icon.alt = `Utilise ${lang}`
             icon.src = langToImage(lang)
-            this.langs.appendChild(icon)
-        }
-
-        if (this.repo.archived) {
-            const icon = document.createElement("img")
-            icon.width = icon.height = "24"
-            icon.alt = "Projet archivé"
-            icon.src = ARCHIVE_IMAGE
-            this.langs.appendChild(icon)
-        }
-        else if (this.repo.fork) {
-            const icon = document.createElement("img")
-            icon.width = icon.height = "24"
-            icon.alt = "Porjet issu d'un fork"
-            icon.src = FORK_IMAGE
             this.langs.appendChild(icon)
         }
     }
