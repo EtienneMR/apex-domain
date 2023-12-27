@@ -114,6 +114,7 @@ class ProjectCard {
         if (src) {
             const img = this.image = document.createElement("img")
             img.src = src
+            img.alt = `Icone de ${this.repo.name}`
             img.classList.add("card__img")
             this.card.insertBefore(img, this.content)
         }
@@ -146,6 +147,7 @@ class ProjectCard {
 
             const icon = document.createElement("img")
             icon.width = icon.height = "24"
+            icon.alt = `Utilise ${lang}`
             icon.src = langToImage(lang)
             this.langs.appendChild(icon)
         }
@@ -153,12 +155,14 @@ class ProjectCard {
         if (this.repo.archived) {
             const icon = document.createElement("img")
             icon.width = icon.height = "24"
+            icon.alt = "Projet archivé"
             icon.src = ARCHIVE_IMAGE
             this.langs.appendChild(icon)
         }
         else if (this.repo.fork) {
             const icon = document.createElement("img")
             icon.width = icon.height = "24"
+            icon.alt = "Porjet issu d'un fork"
             icon.src = FORK_IMAGE
             this.langs.appendChild(icon)
         }
