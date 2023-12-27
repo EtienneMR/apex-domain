@@ -6,6 +6,7 @@ const LANGS_TO_ICON = {
 }
 const FORK_IMAGE = "https://raw.githubusercontent.com/microsoft/vscode-icons/main/icons/dark/repo-forked.svg"
 const ARCHIVE_IMAGE = "https://raw.githubusercontent.com/microsoft/vscode-icons/main/icons/dark/archive.svg"
+const PROXY_BASE = "https://projects-proxy.jeu-etiennemr.workers.dev/?target="
 
 const reposList = document.getElementById("repos-list")
 const profilePicture = document.getElementById("profile-picture")
@@ -185,28 +186,16 @@ class ProjectCard {
                 const langs_list = Object.keys(langs)
 
                 if (!data.image || !data.subtitle) {
-                    let indexUrl = this.repo.homepage
+                    let indexUrl = this.repo.homepage ? new URL(this.repo.homepage) : null
+                    let indexProxyUrl = indexUrl ? PROXY_BASE + encodeURIComponent(indexUrl.href) : null
 
-                    if (!indexUrl && langs_list.includes("HTML")) {
-                        const files_response = await fetch(`https://api.github.com/repos/${this.repo.full_name}/contents`)
-
-                        if (!files_response.ok) {
-                            throw new Error(`GitHub API request failed: ${files_response.status} - ${files_response.statusText}`)
-                        }
-
-                        const files = await files_response.json()
-
-                        const index_html = files.find(file => file.name == "index.html")
-
-                        indexUrl = index_html.download_url
+                    if (!indexUrl && this.repo.has_pages) {
+                        indexUrl = new URL(`/${this.repo.name}/`, location.href)
                     }
 
                     if (indexUrl) {
                         try {
-                            const url = new URL(indexUrl)
-                            if (url.protocol == "http:") url.protocol = "https:"
-
-                            const index_response = await fetch(url.href)
+                            const index_response = await fetch(indexProxyUrl ?? indexUrl.href)
 
                             if (!index_response.ok) {
                                 throw new Error(`GitHub API request failed: ${index_response.status} - ${index_response.statusText}`)
@@ -235,6 +224,9 @@ class ProjectCard {
                                     else if (sizes.length > 0) {
                                         for (let size of sizes) {
                                             const [x, y] = size.includes("x") ? size.split("x") : size.split("X")
+                                            const [nx, ny] = [100 - Number(x), 100 - Number(y)]
+
+                                            if (nx > 0 && ny > 0) continue
 
                                             const diff = Math.abs(100 - Number(x)) + Math.abs(100 - Number(y))
                                             if (diff < minDiff) {
@@ -249,8 +241,13 @@ class ProjectCard {
                                     }
                                 }
                             }
-                            if (faviconHref && !faviconHref.includes("://")) {
-                                faviconHref = `/${this.repo.name}/${faviconHref}`
+
+                            if (faviconHref) {
+                                let faviconUrl = new URL(faviconHref, indexUrl)
+
+                                if (faviconUrl.host == location.host)
+                                    faviconHref = faviconUrl.href
+                                else faviconHref = PROXY_BASE + encodeURIComponent(faviconUrl.href)
                             }
 
                             data.image = faviconHref
