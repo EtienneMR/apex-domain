@@ -1,4 +1,10 @@
 const USERNAME = "EtienneMR"
+const LANGS_TO_ICON = {
+    javascript: "js",
+    java: "jar",
+}
+const FORK_IMAGE = "https://raw.githubusercontent.com/microsoft/vscode-icons/main/icons/dark/repo-forked.svg"
+const ARCHIVE_IMAGE = "https://raw.githubusercontent.com/microsoft/vscode-icons/main/icons/dark/archive.svg"
 
 const reposList = document.getElementById("repos-list")
 const profilePicture = document.getElementById("profile-picture")
@@ -13,13 +19,18 @@ async function fetchPublicRepositories() {
 
         const repositories = await response.json()
 
-        const unarchivedRepositories = repositories.filter(repo => !repo.archived)
-
-        return unarchivedRepositories
+        return repositories
     } catch (error) {
         console.error('Error fetching repositories:', error.message)
         throw error
     }
+}
+
+function langToImage(lang) {
+    lang = lang.toLowerCase()
+    if (LANGS_TO_ICON[lang]) lang = LANGS_TO_ICON[lang]
+
+    return `https://raw.githubusercontent.com/vscode-icons/vscode-icons/master/icons/file_type_${lang}.svg`
 }
 
 class ProjectCard {
@@ -28,6 +39,10 @@ class ProjectCard {
 
         const card = this.card = document.createElement("div")
         card.className = "card"
+
+        const langsElement = this.langs = document.createElement("div")
+        langsElement.className = "card__langs"
+        card.appendChild(langsElement)
 
         const cardContent = this.content = document.createElement("div")
         cardContent.className = "card__content"
@@ -61,6 +76,13 @@ class ProjectCard {
         this.setDescription(repo.description)
         this.addLink("Github", repo.html_url)
 
+        if (repo.homepage) {
+            this.addLink("Afficher", repo.homepage)
+        }
+        else if (repo.has_pages) {
+            this.addLink("Afficher", `/${repo.name}`)
+        }
+
         this.fetch()
     }
 
@@ -92,13 +114,13 @@ class ProjectCard {
         if (src) {
             const img = this.image = document.createElement("img")
             img.src = src
-            img.classList.add("card_img")
+            img.classList.add("card__img")
             this.card.insertBefore(img, this.content)
         }
         else {
             const svg = this.image = document.createElementNS("http://www.w3.org/2000/svg", "svg")
             svg.setAttribute("viewBox", "0 0 24 24")
-            svg.classList.add("card_img")
+            svg.classList.add("card__img", "no-icon")
             this.card.insertBefore(svg, this.content)
 
             const path = document.createElementNS("http://www.w3.org/2000/svg", "path")
@@ -107,65 +129,153 @@ class ProjectCard {
         }
     }
 
+    setLanguages(languages) {
+        while (true) {
+            const next = this.langs.firstChild
+            if (next) next.remove()
+            else break
+        }
+
+        let last = 0
+
+        for (let lang in languages) {
+            let value = languages[lang]
+
+            if (value < last * 0.5) break
+            if (value > last) last = value
+
+            const icon = document.createElement("img")
+            icon.width = icon.height = "24"
+            icon.src = langToImage(lang)
+            this.langs.appendChild(icon)
+        }
+
+        if (this.repo.archived) {
+            const icon = document.createElement("img")
+            icon.width = icon.height = "24"
+            icon.src = ARCHIVE_IMAGE
+            this.langs.appendChild(icon)
+        }
+        else if (this.repo.fork) {
+            const icon = document.createElement("img")
+            icon.width = icon.height = "24"
+            icon.src = FORK_IMAGE
+            this.langs.appendChild(icon)
+        }
+    }
+
     async fetch() {
         const cahedData = sessionStorage.getItem(`project:${this.repo.full_name}`)
 
+        const data = {
+            image: null,
+            subtitle: null,
+            langs: null,
 
-        if (cahedData) {
-            const parsed = JSON.parse(cahedData)
-            this.setSubtitle(parsed.subtitle)
-            this.setImage(parsed.image)
-            this.addLink("Afficher", `/${this.repo.name}`)
+            ...(cahedData ? JSON.parse(cahedData) : {}),
         }
-        else {
-            try {
-                const files_response = await fetch(`https://api.github.com/repos/${this.repo.full_name}/contents`)
+        try {
+            if (!data.langs || !data.subtitle || !data.image) {
+                const langs_response = await fetch(`https://api.github.com/repos/${this.repo.full_name}/languages`)
 
-                if (!files_response.ok) {
-                    throw new Error(`GitHub API request failed: ${files_response.status} - ${files_response.statusText}`)
+                if (!langs_response.ok) {
+                    throw new Error(`GitHub API request failed: ${langs_response.status} - ${langs_response.statusText}`)
                 }
 
-                const files = await files_response.json()
+                const langs = data.langs = await langs_response.json()
+                const langs_list = Object.keys(langs)
 
-                const index_html = files.find(file => file.name == "index.html")
+                if (!data.image || !data.subtitle) {
+                    let indexUrl = this.repo.homepage
 
-                if (index_html) {
-                    const index_response = await fetch(index_html.download_url)
+                    if (!indexUrl && langs_list.includes("HTML")) {
+                        const files_response = await fetch(`https://api.github.com/repos/${this.repo.full_name}/contents`)
 
-                    if (!index_response.ok) {
-                        throw new Error(`GitHub API request failed: ${index_response.status} - ${index_response.statusText}`)
+                        if (!files_response.ok) {
+                            throw new Error(`GitHub API request failed: ${files_response.status} - ${files_response.statusText}`)
+                        }
+
+                        const files = await files_response.json()
+
+                        const index_html = files.find(file => file.name == "index.html")
+
+                        indexUrl = index_html.download_url
                     }
 
-                    const indexContents = await index_response.text()
+                    if (indexUrl) {
+                        try {
 
-                    const parser = new DOMParser()
-                    const doc = parser.parseFromString(indexContents, 'text/html')
+                            const index_response = await fetch(indexUrl)
 
-                    const faviconLink = doc.querySelector('link[rel="icon"]') || doc.querySelector('link[rel="shortcut icon"]')
-                    const title = doc.querySelector('title')
+                            if (!index_response.ok) {
+                                throw new Error(`GitHub API request failed: ${index_response.status} - ${index_response.statusText}`)
+                            }
 
-                    const href = faviconLink ? faviconLink.getAttribute("href") : null
+                            const indexContents = await index_response.text()
 
-                    const data = {
-                        image: href ? (href.startsWith("https://") ? href : `/${this.repo.name}/${faviconLink.getAttribute("href")}`) : null,
-                        subtitle: title ? title.textContent : "",
+                            const parser = new DOMParser()
+                            const doc = parser.parseFromString(indexContents, 'text/html')
+
+                            const title = doc.querySelector('title')
+
+                            let faviconHref = null
+                            let minDiff = Infinity
+
+                            for (let link of doc.querySelectorAll("link")) {
+                                if (link.rel.endsWith("icon")) {
+                                    const sizes = link.sizes
+
+                                    console.log(sizes)
+
+                                    if (sizes.contains("any")) {
+                                        faviconHref = link.href
+                                        break
+                                    }
+                                    else if (sizes.length > 0) {
+                                        for (let size of sizes) {
+                                            const [x, y] = size.includes("x") ? size.split("x") : size.split("X")
+
+                                            const diff = Math.abs(100 - Number(x)) + Math.abs(100 - Number(y))
+                                            if (diff < minDiff) {
+                                                minDiff = diff
+                                                faviconHref = link.href
+                                            }
+                                            if (diff == 0) break
+                                        }
+                                    }
+                                    else {
+                                        faviconHref = link.href
+                                    }
+                                }
+                            }
+
+                            if (faviconHref && !faviconHref.includes("://")) {
+                                faviconHref = `/${this.repo.name}/${faviconHref}`
+                            }
+
+                            data.image = new URL(faviconHref, this.repo.homepage ?? location.href).href
+                            data.subtitle = title ? title.textContent : null
+                        } catch (error) {
+                            console.info(`Failled to fetch index page of ${this.repo.name} at ${indexUrl} because ${error}. Using default image and subtitle`)
+                        }
                     }
-
-                    const stringified = JSON.stringify(data)
-                    sessionStorage.setItem(`project:${this.repo.full_name}`, stringified)
-
-                    this.setImage(data.image)
-                    this.setSubtitle(data.subtitle)
-                    this.addLink("Afficher", `/${this.repo.name}`)
-
-                    return
                 }
-            } catch (error) {
-                throw error
+
+                if (!data.image && langs_list.length > 0) {
+                    data.image = langToImage(langs_list[0])
+                }
+
+                const stringified = JSON.stringify(data)
+                sessionStorage.setItem(`project:${this.repo.full_name}`, stringified)
             }
-            this.setImage(null)
-            this.setSubtitle(this.repo.full_name)
+        } catch (error) {
+            console.error(error)
         }
+
+        this.setImage(data.image)
+        this.setSubtitle(data.subtitle ?? this.repo.full_name)
+        this.setLanguages(data.langs ?? [])
+
     }
 }
 
