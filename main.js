@@ -1,6 +1,7 @@
 const USERNAME = "EtienneMR"
 const LANGS_TO_ICON = {
     javascript: "js",
+    typescript: "ts",
     java: "jar",
 }
 const FORK_IMAGE = "https://raw.githubusercontent.com/microsoft/vscode-icons/main/icons/dark/repo-forked.svg"
