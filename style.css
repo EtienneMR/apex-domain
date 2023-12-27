@@ -51,12 +51,12 @@ a:hover::before {
 
 .top {
   align-content: center;
-  min-height: calc(100vh - 10px - 1.5em - 20px);
+  min-height: calc(100svh - 10px - 1.5em - 20px);
 }
 
 .bottom {
   align-content: start;
-  min-height: calc(50vh + 0.75em + 152px);
+  min-height: calc(50svh + 0.75em + 152px);
 }
 
 .main-card {
