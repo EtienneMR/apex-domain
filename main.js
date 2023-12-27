@@ -204,8 +204,10 @@ class ProjectCard {
 
                     if (indexUrl) {
                         try {
+                            const url = new URL(indexUrl)
+                            if (url.protocol == "http:") url.protocol = "https:"
 
-                            const index_response = await fetch(indexUrl)
+                            const index_response = await fetch(url.href)
 
                             if (!index_response.ok) {
                                 throw new Error(`GitHub API request failed: ${index_response.status} - ${index_response.statusText}`)
