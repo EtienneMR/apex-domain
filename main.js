@@ -50,8 +50,8 @@ class ProjectCard {
             const icon = document.createElement("img")
             icon.className = "card__status"
             icon.width = icon.height = "24"
-            icon.alt = icon.title = this.repo.archived ? "Projet archivé" : "Porjet issu d'une fork"
-            icon.src = this.repo.archived ? ARCHIVE_IMAGE : FORK_IMAGE
+            icon.alt = icon.title = this.repo.fork ? "Porjet issu d'une fork" : "Projet archivé"
+            icon.src = this.repo.fork ? FORK_IMAGE : ARCHIVE_IMAGE
             card.appendChild(icon)
         }
 
