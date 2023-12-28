@@ -7,6 +7,7 @@ const LANGS_TO_ICON = {
 const FORK_IMAGE = "https://raw.githubusercontent.com/microsoft/vscode-icons/main/icons/dark/repo-forked.svg"
 const ARCHIVE_IMAGE = "https://raw.githubusercontent.com/microsoft/vscode-icons/main/icons/dark/archive.svg"
 const PROXY_BASE = "https://projects-proxy.jeu-etiennemr.workers.dev/?target="
+const NO_PROXY_HOSTS = ["avatars.githubusercontent.com", location.host]
 
 const reposList = document.getElementById("repos-list")
 const profilePicture = document.getElementById("profile-picture")
@@ -36,7 +37,7 @@ function langToImage(lang) {
 }
 
 function withProxy(url) {
-    if (url.host == location.host)
+    if (NO_PROXY_HOSTS.includes(url.host))
         return url.href
     else return PROXY_BASE + encodeURIComponent(url.href)
 }
