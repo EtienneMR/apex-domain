@@ -100,7 +100,7 @@ class ProjectCard {
             this.addLink("Afficher", `/${repo.name}`)
         }
 
-        this.fetch()
+        this.fetch().finally(() => card.classList.add("loaded"))
     }
 
     setTitle(title) {
