@@ -135,6 +135,10 @@ a:hover::before {
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
+.card:not(:hover) a {
+  pointer-events: none;
+}
+
 .card__langs:not(:empty),
 .card__status {
   position: absolute;
@@ -144,12 +148,24 @@ a:hover::before {
   padding: 4px;
   border-radius: 4px;
   height: 24px;
+  transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.card:hover .card__langs:not(:empty) {
+  opacity: 0;
 }
 
 .card__status {
   left: unset;
   right: 4px;
   z-index: 2;
+}
+
+.card:hover .card__status {
+  background-color: transparent;
+  right: calc(100% - 44px);
+  top: 20px;
+  padding: 0;
 }
 
 .card__img {
@@ -163,6 +179,11 @@ a:hover::before {
   height: 48px;
   width: 48px;
   fill: #333;
+}
+
+.card:hover .card_img {
+  scale: 0;
+  transform: rotate(-45deg);
 }
 
 .card__content {
@@ -194,6 +215,10 @@ a:hover::before {
   font-family: "Metropolis Bold", Arial, sans-serif;
 }
 
+.card__status ~ .card__content .card__title {
+  margin: 0 0 0 30px;
+}
+
 .card__subtitle {
   font-weight: bold;
 }
@@ -215,9 +240,4 @@ a:hover::before {
   font-size: 0.8rem;
   display: flex;
   gap: 10px;
-}
-
-.card:hover .card_img {
-  scale: 0;
-  transform: rotate(-45deg);
 }

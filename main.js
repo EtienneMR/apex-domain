@@ -35,6 +35,12 @@ function langToImage(lang) {
     return `https://raw.githubusercontent.com/vscode-icons/vscode-icons/master/icons/file_type_${lang}.svg`
 }
 
+function withProxy(url) {
+    if (url.host == location.host)
+        return url.href
+    else return PROXY_BASE + encodeURIComponent(url.href)
+}
+
 class ProjectCard {
     constructor(repo) {
         this.repo = repo
@@ -187,7 +193,6 @@ class ProjectCard {
 
                 if (!data.image || !data.subtitle) {
                     let indexUrl = this.repo.homepage ? new URL(this.repo.homepage) : null
-                    let indexProxyUrl = indexUrl ? PROXY_BASE + encodeURIComponent(indexUrl.href) : null
 
                     if (!indexUrl && this.repo.has_pages) {
                         indexUrl = new URL(`/${this.repo.name}/`, location.href)
@@ -195,7 +200,7 @@ class ProjectCard {
 
                     if (indexUrl) {
                         try {
-                            const index_response = await fetch(indexProxyUrl ?? indexUrl.href)
+                            const index_response = await fetch(withProxy(indexUrl))
 
                             if (!index_response.ok) {
                                 throw new Error(`GitHub API request failed: ${index_response.status} - ${index_response.statusText}`)
@@ -242,13 +247,7 @@ class ProjectCard {
                                 }
                             }
 
-                            if (faviconHref) {
-                                let faviconUrl = new URL(faviconHref, indexUrl)
-
-                                if (faviconUrl.host == location.host)
-                                    faviconHref = faviconUrl.href
-                                else faviconHref = PROXY_BASE + encodeURIComponent(faviconUrl.href)
-                            }
+                            if (faviconHref) faviconHref = withProxy(new URL(faviconHref, indexUrl))
 
                             data.image = faviconHref
                             data.subtitle = title ? title.textContent : null
