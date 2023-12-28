@@ -44,8 +44,8 @@ a:hover::before {
 .wraper {
   display: flex;
   justify-content: center;
-  user-select: none;
   -webkit-user-select: none;
+  user-select: none;
   flex-wrap: wrap;
   gap: 20px;
 }
@@ -198,8 +198,8 @@ a:hover::before {
   display: flex;
   flex-direction: column;
   font-family: "Metropolis Light", Arial, sans-serif;
-  user-select: text;
   -webkit-user-select: text;
+  user-select: text;
 }
 
 .card.loaded:hover .card__content {

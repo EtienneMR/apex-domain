@@ -6,7 +6,7 @@ const LANGS_TO_ICON = {
 }
 const FORK_IMAGE = "https://raw.githubusercontent.com/microsoft/vscode-icons/main/icons/dark/repo-forked.svg"
 const ARCHIVE_IMAGE = "https://raw.githubusercontent.com/microsoft/vscode-icons/main/icons/dark/archive.svg"
-const PROXY_BASE = "https://projects-proxy.jeu-etiennemr.workers.dev/?target="
+const PROXY_BASE = "https://projects-proxy.etiennemr.fr//?target="
 const NO_PROXY_HOSTS = ["avatars.githubusercontent.com", location.host]
 
 const reposList = document.getElementById("repos-list")
