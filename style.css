@@ -225,6 +225,7 @@ a:hover::before {
 
 .card__description {
   flex: 1;
+  overflow-y: auto;
 }
 
 .card__description,
@@ -236,8 +237,31 @@ a:hover::before {
 }
 
 .card__links {
-  margin: 0;
+  margin: 10px 0 0 0;
   font-size: 0.8rem;
   display: flex;
   gap: 10px;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: rgba(255, 255, 255, 0.9);
 }
