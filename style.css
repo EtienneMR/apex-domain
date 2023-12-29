@@ -53,12 +53,14 @@ a:hover::before {
 .top {
   align-content: center;
   min-height: calc(100svh - 10px - 1.5em - 20px);
+  background: linear-gradient(180deg, #0a2243, #0d2d59);
 }
 
 .bottom {
   align-content: start;
   min-height: calc(50svh + 0.75em + 152px);
   padding-bottom: 20px;
+  background: linear-gradient(180deg, #0d2d59, #144385);
 }
 
 .main-card {
