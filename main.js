@@ -22,6 +22,8 @@ async function fetchPublicRepositories() {
 
         const repositories = await response.json()
 
+        repositories.sort((rep1, rep2) => rep1.archived - rep2.archived)
+
         return repositories
     } catch (error) {
         console.error('Error fetching repositories:', error.message)
